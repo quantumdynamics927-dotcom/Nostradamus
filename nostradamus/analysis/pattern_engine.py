@@ -26,6 +26,18 @@ class EventType(Enum):
     ECONOMIC_STRESS = "economic_stress"
     POLITICAL = "political"
     UNKNOWN = "unknown"
+    # Natural Disasters
+    EARTHQUAKE = "earthquake"
+    TSUNAMI = "tsunami"
+    VOLCANIC = "volcanic"
+    WILDFIRE = "wildfire"
+    DROUGHT = "drought"
+    # Space / Planetary Events
+    SOLAR_STORM = "solar_storm"
+    ASTEROID = "asteroid"
+    COMET = "comet"
+    # Infrastructure / Technological
+    INFRASTRUCTURE = "infrastructure"
 
 class Region(Enum):
     FRANCE = "France"
@@ -39,6 +51,9 @@ class Region(Enum):
     EAST = "East"
     BELGIUM = "Belgium"
     SCOTLAND = "Scotland"
+    PACIFIC_RIM = "Pacific_Rim"
+    SOUTH_ASIA = "South_Asia"
+    GLOBAL = "Global"
     UNKNOWN = "Unknown"
 
 @dataclass
@@ -478,6 +493,25 @@ STANDARD_CYCLES = [
         name="Political Assassination Sequence",
         event_types=[EventType.ASSASSINATION, EventType.REVOLUTION, EventType.WAR],
         typical_duration_years=10
+    ),
+    # Natural Disaster Cycles
+    Cycle(
+        cycle_id="disaster-famine-unrest",
+        name="Disaster-Famine-Unrest Chain",
+        event_types=[EventType.EARTHQUAKE, EventType.FAMINE, EventType.REVOLUTION],
+        typical_duration_years=15
+    ),
+    Cycle(
+        cycle_id="solar-storm-infrastructure",
+        name="Solar Storm Infrastructure Failure",
+        event_types=[EventType.SOLAR_STORM, EventType.INFRASTRUCTURE, EventType.ECONOMIC_STRESS],
+        typical_duration_years=8
+    ),
+    Cycle(
+        cycle_id="asteroid-threat-cycle",
+        name="Asteroid Threat Response Cycle",
+        event_types=[EventType.ASTEROID, EventType.ECONOMIC_STRESS, EventType.POLITICAL],
+        typical_duration_years=50
     ),
 ]
 

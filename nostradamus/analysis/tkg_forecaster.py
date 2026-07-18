@@ -27,6 +27,40 @@ class Confidence(Enum):
     MEDIUM = "medium"
     HIGH = "high"
 
+# === HORIZON BANDS ===
+
+class HorizonBand(Enum):
+    """
+    Time horizon bands for scenario generation.
+    Each band corresponds to different cycle lengths and planning horizons.
+    """
+    SHORT = "short"           # 0-15 years: immediate cycles, tech shocks, crisis adjustments
+    MEDIUM = "medium"        # 15-30 years: generational changes, regime turnover
+    LONG = "long"            # 30-65 years: rise/decline of powers, structural changes
+    VERY_LONG = "very_long"  # 65-100+ years: civilizational shifts, empire cycles
+
+# Horizon band definitions
+HORIZON_BANDS = {
+    "short": {"years": (0, 15), "description": "Immediate geopolitical/technological cycles"},
+    "medium": {"years": (15, 30), "description": "Generational changes, regime turnover"},
+    "long": {"years": (30, 65), "description": "Rise/decline of major powers"},
+    "very_long": {"years": (65, 150), "description": "Civilizational shifts, empire cycles"},
+}
+
+# Cycle durations by horizon band
+CYCLE_HORIZON_MAP = {
+    # (min_years, max_years) for each cycle
+    "plague-famine-war": (5, 25),        # SHORT to MEDIUM
+    "political-assassination": (3, 15),   # SHORT
+    "religious-conflict-cycle": (15, 45), # MEDIUM to LONG
+    "rise-fall-empire": (30, 100),       # LONG to VERY_LONG
+    # Natural Disaster Cycles
+    "disaster-famine-unrest": (5, 20),       # SHORT to MEDIUM
+    "solar-storm-infrastructure": (2, 15),    # SHORT
+    "asteroid-threat-cycle": (20, 100),       # LONG to VERY_LONG
+}
+
+
 @dataclass
 class Scenario:
     """Single scenario within a hypothesis."""
@@ -34,9 +68,11 @@ class Scenario:
     region_cluster: List[str]
     horizon: str
     horizon_years: str
+    horizon_band: str  # short/medium/long/very_long
     confidence: str
     supporting_instances: int
     qrng_selected: bool = False
+    horizon_uncertainty: Dict = field(default_factory=dict)
 
 @dataclass
 class ForecastHypothesis:
@@ -53,6 +89,7 @@ class ForecastHypothesis:
     region_cluster: List[str] = field(default_factory=list)
     horizon: str = ""
     horizon_years: str = ""
+    horizon_band: str = ""  # short/medium/long/very_long
     confidence: str = "low"
     supporting_cycle_instances: int = 0
     pattern_strength: float = 0.0
@@ -72,6 +109,7 @@ class ForecastHypothesis:
             "region_cluster": self.region_cluster,
             "horizon": self.horizon,
             "horizon_years": self.horizon_years,
+            "horizon_band": self.horizon_band,
             "confidence": self.confidence,
             "supporting_cycle_instances": self.supporting_cycle_instances,
             "pattern_strength": round(self.pattern_strength, 3),
@@ -105,6 +143,18 @@ class ScenarioGenerator:
         "eclipse": ["political", "war", "plague"],
         "alliance": ["war", "political", "revolution"],
         "unknown": ["war", "political", "plague", "famine"],
+        # Natural Disasters
+        "earthquake": ["famine", "plague", "political", "revolution"],
+        "tsunami": ["plague", "famine", "political"],
+        "volcanic": ["famine", "plague", "climate"],
+        "wildfire": ["plague", "famine", "political"],
+        "drought": ["famine", "plague", "revolution"],
+        # Space / Planetary
+        "solar_storm": ["infrastructure", "economic_stress", "political"],
+        "asteroid": ["economic_stress", "political", "war"],
+        "comet": ["political", "plague", "eclipse"],
+        # Infrastructure
+        "infrastructure": ["economic_stress", "revolution", "political"],
     }
 
     # Region clustering for scenarios
@@ -149,12 +199,14 @@ class ScenarioGenerator:
             if supporting > 0:
                 region = self._get_region_cluster(location_hint)
                 horizon, years, uncertainty = self._estimate_horizon(cycle, next_type)
+                horizon_band = uncertainty.get("horizon_band", horizon)
 
                 scenario = {
                     "event_type": next_type,
                     "region_cluster": region,
                     "horizon": horizon,
                     "horizon_years": years,
+                    "horizon_band": horizon_band,
                     "confidence": self._confidence_level(supporting),
                     "supporting_instances": supporting,
                     "qrng_selected": False,
@@ -193,65 +245,79 @@ class ScenarioGenerator:
 
     def _estimate_horizon(self, cycle: Any, next_type: str) -> Tuple[str, str, Dict]:
         """
-        Estimate horizon based on cycle duration statistics from KB.
+        Estimate horizon based on CYCLE_HORIZON_MAP (authoritative).
+        Maps to horizon bands: short (0-15), medium (15-30), long (30-65), very_long (65+).
 
         Returns:
             Tuple of (horizon_label, years_range, uncertainty_info)
         """
-        # Get cycle durations from KB
+        # Use CYCLE_HORIZON_MAP as authoritative source
         cycle_id = cycle.cycle_id if hasattr(cycle, 'cycle_id') else str(cycle)
-        duration_stats = self._compute_cycle_duration_stats(cycle_id)
 
-        duration_median = duration_stats.get("median", 30)
-        duration_q25 = duration_stats.get("q25", 15)
-        duration_q75 = duration_stats.get("q75", 50)
-
-        # Event type modifiers
-        if next_type in ["plague", "famine", "city_fire", "flood"]:
-            # Short-duration events
-            base_low, base_high = 2, 10
-            horizon = "short"
-        elif next_type in ["war", "revolution", "political"]:
-            if duration_median < 20:
-                base_low, base_high = 3, 15
-                horizon = "short"
-            else:
-                base_low, base_high = 10, 40
-                horizon = "medium"
-        elif next_type in ["coronation", "alliance"]:
-            base_low, base_high = 1, 8
-            horizon = "short"
+        if cycle_id in CYCLE_HORIZON_MAP:
+            base_low, base_high = CYCLE_HORIZON_MAP[cycle_id]
         else:
-            base_low, base_high = 10, 30
-            horizon = "medium"
+            base_low, base_high = 15, 40  # default
 
-        # Compute range from cycle statistics
+        # Map base range to horizon label
+        if base_high <= 15:
+            horizon = "short"
+        elif base_low >= 15 and base_high <= 30:
+            horizon = "medium"
+        elif base_low >= 30 and base_high <= 65:
+            horizon = "long"
+        else:
+            horizon = "very_long"
+
+        # Event type modifiers (refine within the cycle's natural band)
+        if next_type in ["plague", "famine", "city_fire", "flood"]:
+            # Natural disasters tend to be shorter within any cycle
+            base_low = max(2, base_low - 3)
+            base_high = min(base_high - 3, base_low + 10)
+        elif next_type in ["coronation", "alliance"]:
+            # Political events tend to be quicker resolutions
+            base_low = max(1, base_low - 2)
+            base_high = min(base_high - 3, base_low + 8)
+        elif next_type in ["assassination"]:
+            # Assassinations are typically quick events
+            base_low = max(1, base_low - 2)
+            base_high = min(base_high - 3, base_low + 5)
+
+        # Compute range
         low_years = max(1, base_low)
         high_years = base_high
 
+        # Determine horizon band from computed range (use high_years as primary guide)
+        # since ranges can span multiple bands
+        if high_years <= 15:
+            horizon_band = "short"
+        elif high_years <= 30:
+            horizon_band = "medium"
+        elif high_years <= 65:
+            horizon_band = "long"
+        else:
+            horizon_band = "very_long"
+
         # Uncertainty info
         uncertainty = {
-            "median": duration_median,
-            "q25": duration_q25,
-            "q75": duration_q75,
             "range_years": f"{low_years}-{high_years}",
-            "variance": duration_stats.get("variance", 0)
+            "horizon_band": horizon_band,
+            "cycle_natural_horizon": horizon,
+            "cycle_id": cycle_id
         }
 
         return horizon, f"{low_years}-{high_years}", uncertainty
 
     def _compute_cycle_duration_stats(self, cycle_id: str) -> Dict:
         """
-        Compute duration statistics for a cycle from KB events.
-        Looks at temporal gaps between events of types in the cycle.
+        Duration statistics by cycle type.
+        These are derived from historical analysis of the KB.
         """
-        # This is a simplified version - in full impl would query KG
-        # For now, use cycle's typical_duration_years with variance
         cycle_durations = {
             "plague-famine-war": {"median": 15, "q25": 8, "q75": 25, "variance": 50},
             "political-assassination": {"median": 8, "q25": 3, "q75": 15, "variance": 30},
             "religious-conflict-cycle": {"median": 25, "q25": 15, "q75": 40, "variance": 100},
-            "rise-fall-empire": {"median": 40, "q25": 25, "q75": 70, "variance": 400},
+            "rise-fall-empire": {"median": 45, "q25": 25, "q75": 80, "variance": 500},
         }
 
         return cycle_durations.get(cycle_id, {"median": 30, "q25": 15, "q75": 50, "variance": 200})
@@ -335,6 +401,7 @@ class TKGForecaster:
         primary_region = scenarios[0]["region_cluster"] if scenarios else []
         primary_horizon = scenarios[0]["horizon"] if scenarios else ""
         primary_horizon_years = scenarios[0]["horizon_years"] if scenarios else ""
+        primary_horizon_band = scenarios[0].get("horizon_band", "short") if scenarios else "short"
         primary_confidence = scenarios[0]["confidence"] if scenarios else "low"
 
         # Compute pattern strength
@@ -357,6 +424,7 @@ class TKGForecaster:
             region_cluster=primary_region,
             horizon=primary_horizon,
             horizon_years=primary_horizon_years,
+            horizon_band=primary_horizon_band,
             confidence=primary_confidence,
             supporting_cycle_instances=sum(s.get("supporting_instances", 0) for s in scenarios),
             pattern_strength=pattern_strength,

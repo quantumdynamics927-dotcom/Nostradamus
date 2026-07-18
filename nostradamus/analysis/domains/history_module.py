@@ -53,6 +53,21 @@ EVENT_TYPES = {
                  "ambassade", "ambasadeurs"],
     "eclipse": ["eclipse", "obscurcissement", "tenebres", "soleil noir", "lune sang"],
     "flood": ["inondation", "deluge", "pluie", "eaux", "grece", "fleuve"],
+    # Natural Disasters
+    "earthquake": ["terre trembler", "tremblement", "terremotus", "secousse",
+                   "la terre movra", "la terre s esmouvra"],
+    "tsunami": ["vague grand", "mer monter", "inondation marin", "tsunami"],
+    "volcanic": ["feu grond", "volcan", "montagne flamber", "lave couler",
+                 "ember z", "braz"],
+    "wildfire": ["forest brusler", "flamber", "feu grand", "incend", "braslar"],
+    "drought": ["secheresse", "chaleur grand", "eaux manque", "siccite",
+                "aridite", "sans pluye"],
+    # Space / Planetary
+    "solar_storm": ["aurore", "flammes ciel", "coron", "masse solaire",
+                    "vent solaire", "aurora borealis"],
+    "asteroid": ["astre cheoir", "pierre ciel", "asteroid", "meteor", "meteorite"],
+    "comet": ["comete", "trouble estoille", "estoille queue", "queue estoille",
+              "chevelure estoille"],
 }
 
 # Location keywords
