@@ -13,25 +13,25 @@ ISSUE SIGNALS (sorted by pattern strength)
 
 [HIGH  ] 124q ( 13.0%) | War / Interstate Conflict
            Horizon: 1-15 (short) | Current: high
-           Cycles: ['religious-conflict-cycle', 'disaster-famine-unrest', 'rise-fall-empire', 'plague-famine-war', 'political-assassination']
+           Cycles: ['religious-conflict-cycle', 'comet-omen-cycle', 'disaster-famine-unrest', 'political-assassination', 'rise-fall-empire', 'plague-famine-war']
            Top symbols: guerre, siege, armee, mort, roy, feu
            Top quatrain: C1-Q5
 
 [HIGH  ] 166q ( 17.5%) | Plague / Epidemic / Health Shock
            Horizon: 1-15 (short) | Current: moderate
-           Cycles: ['plague-famine-war', 'disaster-famine-unrest']
+           Cycles: ['plague-famine-war', 'wildfire-plague-cycle', 'disaster-famine-unrest']
            Top symbols: mort, peste, roy, feu, regne, roi
            Top quatrain: C1-Q9
 
 [HIGH  ]   8q (  0.8%) | Famine / Drought / Food Stress
            Horizon: 1-15 (short) | Current: moderate
-           Cycles: ['plague-famine-war', 'disaster-famine-unrest']
+           Cycles: ['plague-famine-war', 'wildfire-plague-cycle', 'disaster-famine-unrest']
            Top symbols: famine, peste, militaire, mort, siege, feu
            Top quatrain: C1-Q15
 
 [HIGH  ]  80q (  8.4%) | Fire / Wildfire / Urban Destruction
            Horizon: 1-15 (short) | Current: elevated
-           Cycles: none
+           Cycles: ['wildfire-plague-cycle']
            Top symbols: feu, mort, roi, roy, guerre, peste
            Top quatrain: C1-Q1
 
@@ -43,7 +43,7 @@ ISSUE SIGNALS (sorted by pattern strength)
 
 [HIGH  ]   8q (  0.8%) | Solar Storm / Space Weather Alert
            Horizon: 1-15 (short) | Current: moderate
-           Cycles: ['asteroid-threat-cycle', 'solar-storm-infrastructure']
+           Cycles: ['solar-storm-infrastructure', 'asteroid-threat-cycle']
            Top symbols: feu, feu du ciel, coron, terre trembler, roi, pierre ciel
            Top quatrain: C1-Q45
 
@@ -55,19 +55,19 @@ ISSUE SIGNALS (sorted by pattern strength)
 
 [HIGH  ]  26q (  2.7%) | Economic / Financial Stress
            Horizon: 15-30 (medium) | Current: moderate
-           Cycles: ['rise-fall-empire', 'solar-storm-infrastructure', 'asteroid-threat-cycle']
+           Cycles: ['comet-omen-cycle', 'solar-storm-infrastructure', 'asteroid-threat-cycle', 'rise-fall-empire']
            Top symbols: marche, argent, banque, mort, guerre, roi
            Top quatrain: C1-Q52
 
 [MEDIUM]   4q (  0.4%) | Civil Unrest / Rebellion
            Horizon: 1-15 (short) | Current: high
-           Cycles: ['religious-conflict-cycle', 'disaster-famine-unrest', 'rise-fall-empire', 'asteroid-threat-cycle', 'political-assassination']
+           Cycles: ['religious-conflict-cycle', 'disaster-famine-unrest', 'political-assassination', 'rise-fall-empire', 'asteroid-threat-cycle']
            Top symbols: sedition, roy, combat, siege, feu
            Top quatrain: C1-Q12
 
 [MEDIUM]   3q (  0.3%) | Celestial Omen / Comet / Eclipse
            Horizon: 15-30 (medium) | Current: moderate
-           Cycles: none
+           Cycles: ['comet-omen-cycle']
            Top symbols: tenebres, defait, comete, eclipse
            Top quatrain: C1-Q83
 

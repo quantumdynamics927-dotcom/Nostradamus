@@ -58,6 +58,9 @@ CYCLE_HORIZON_MAP = {
     "disaster-famine-unrest": (5, 20),       # SHORT to MEDIUM
     "solar-storm-infrastructure": (2, 15),    # SHORT
     "asteroid-threat-cycle": (20, 100),       # LONG to VERY_LONG
+    # Comet / Wildfire Cycles
+    "comet-omen-cycle": (15, 40),            # MEDIUM to LONG
+    "wildfire-plague-cycle": (5, 25),        # SHORT to MEDIUM
 }
 
 

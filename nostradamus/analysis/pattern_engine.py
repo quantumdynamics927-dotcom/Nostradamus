@@ -513,6 +513,20 @@ STANDARD_CYCLES = [
         event_types=[EventType.ASTEROID, EventType.ECONOMIC_STRESS, EventType.POLITICAL],
         typical_duration_years=50
     ),
+    # Comet / Celestial Omen Cycles
+    Cycle(
+        cycle_id="comet-omen-cycle",
+        name="Comet / Celestial Omen Sequence",
+        event_types=[EventType.COMET, EventType.ECONOMIC_STRESS, EventType.WAR],
+        typical_duration_years=30
+    ),
+    # Wildfire / Fire Cycles
+    Cycle(
+        cycle_id="wildfire-plague-cycle",
+        name="Wildfire-Plague-Famine Chain",
+        event_types=[EventType.WILDFIRE, EventType.PLAGUE, EventType.FAMINE],
+        typical_duration_years=20
+    ),
 ]
 
 # === API ===
