@@ -438,8 +438,12 @@ class TKGForecaster:
         return hypothesis
 
     def _infer_event_type(self, text: str) -> str:
-        """Infer event type from text keywords."""
+        """Infer event type from text keywords. Prefers longer/more specific keywords."""
+        import html as html_module
+        text = html_module.unescape(text)
         type_keywords = {
+            # Longer/more specific keywords first — scored by length to avoid
+            # short ambiguous matches (e.g. "feu" in city_fire overriding "feu du ciel")
             "war": ["guerre", "bataille", "combat", "armee", "soldats", "militaire", "chef", "capitaine"],
             "plague": ["peste", "plague", "maladie", "epidemie", "mort", "deces"],
             "famine": ["famine", "disette", "sterilite", "reve"],
@@ -449,15 +453,38 @@ class TKGForecaster:
             "eclipse": ["eclipse", "obscurcissement", "tenebres", "soleil", "lune"],
             "flood": ["inondation", "deluge", "pluie", "eaux", "mer"],
             "assassination": ["assassin", "tuer", "meurtre", "mort traytre"],
-            "city_fire": ["feu", "bruler", "incendie", "flambe"],
+            "city_fire": ["forest brusler", "incend", "braslar"],
             "political": ["senat", "peuple", "republique", "empire", "prince", "roy"],
             "religious_schism": ["religion", "foy", "eglise", "heretique", "schisme"],
+            # Natural Disasters (specific phrases first)
+            "earthquake": ["terre trembler", "tremblement de terre", "terremotus", "terre movra",
+                            "terre esmouvra", "terre fendu", "la terre tremblera", "secousse"],
+            "tsunami": ["vague grand", "mer monter", "tsunami"],
+            "volcanic": ["feu grond", "volcan", "montagne flamber", "lave couler"],
+            "wildfire": ["forest brusler", "incend", "braslar", "feu grand"],
+            "drought": ["secheresse", "siccite", "sans pluye", "fontaine secher"],
+            # Space / Planetary
+            "solar_storm": ["feu du ciel", "flammes ciel", "aurore", "coron", "masse solaire",
+                             "vent solaire", "lumiere celest"],
+            "asteroid": ["pierre ciel", "meteor", "meteorite", "astre cheoir"],
+            "comet": ["comete", "trouble estoille", "estoille queue", "etoile queue",
+                       "etoile trenchant", "astre queue"],
         }
 
+        # Score each type by total keyword character length found
+        # Longer matches = more specific = higher priority
+        type_scores = {}
         for et, keywords in type_keywords.items():
-            if any(kw in text for kw in keywords):
-                return et
-        return "unknown"
+            score = 0
+            for kw in keywords:
+                if kw in text:
+                    score += len(kw)  # weight by keyword length
+            if score > 0:
+                type_scores[et] = score
+
+        if not type_scores:
+            return "unknown"
+        return max(type_scores, key=type_scores.get)
 
     def _infer_location(self, text: str) -> str:
         """Infer location from text."""
