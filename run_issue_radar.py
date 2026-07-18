@@ -38,12 +38,21 @@ def main():
         quatrains = json.load(f)
     print(f"Quatrains loaded: {len(quatrains)}")
 
+    # Load almanac corpus
+    try:
+        from nostradamus.data.almanac_corpus import ALL_ALMANACS
+        almanacs = ALL_ALMANACS
+        print(f"Almanacs loaded: {len(almanacs)}")
+    except Exception as e:
+        print(f"Almanac corpus not available: {e}")
+        almanacs = None
+
     # Initialize radar
     radar = IssueRadar(kg=kg, kb_events=kb_events)
 
     # Scan (minimum 1 quatrain per issue)
     print("\nScanning for issue signals...")
-    signals = radar.scan_quatrains(quatrains, min_quatrain_count=1)
+    signals = radar.scan_quatrains(quatrains, almanacs=almanacs, min_quatrain_count=1)
     print(f"Issue signals found: {len(signals)}")
 
     # Add horizon forecasts

@@ -11,29 +11,35 @@ Issue categories        : 10
 ISSUE SIGNALS (sorted by pattern strength)
 ======================================================================
 
-[HIGH  ] 124q ( 13.0%) | War / Interstate Conflict
-           Horizon: 1-15 (short) | Current: high
-           Cycles: ['religious-conflict-cycle', 'comet-omen-cycle', 'disaster-famine-unrest', 'political-assassination', 'rise-fall-empire', 'plague-famine-war']
-           Top symbols: guerre, siege, armee, mort, roy, feu
-           Top quatrain: C1-Q5
+[HIGH  ] 320q ( 33.6%) | Dynastic / Succession Crisis
+           Horizon: 15-30 (medium) | Current: high
+           Cycles: ['political-assassination']
+           Top symbols: roy, roi, regne, mort, empire, feu
+           Top quatrain: C1-Q1
 
 [HIGH  ] 166q ( 17.5%) | Plague / Epidemic / Health Shock
            Horizon: 1-15 (short) | Current: moderate
-           Cycles: ['plague-famine-war', 'wildfire-plague-cycle', 'disaster-famine-unrest']
+           Cycles: ['plague-famine-war', 'disaster-famine-unrest', 'wildfire-plague-cycle']
            Top symbols: mort, peste, roy, feu, regne, roi
            Top quatrain: C1-Q9
 
-[HIGH  ]   8q (  0.8%) | Famine / Drought / Food Stress
-           Horizon: 1-15 (short) | Current: moderate
-           Cycles: ['plague-famine-war', 'wildfire-plague-cycle', 'disaster-famine-unrest']
-           Top symbols: famine, peste, militaire, mort, siege, feu
-           Top quatrain: C1-Q15
+[HIGH  ] 124q ( 13.0%) | War / Interstate Conflict
+           Horizon: 1-15 (short) | Current: high
+           Cycles: ['disaster-famine-unrest', 'plague-famine-war', 'political-assassination', 'rise-fall-empire', 'comet-omen-cycle', 'religious-conflict-cycle']
+           Top symbols: guerre, siege, armee, mort, roy, feu
+           Top quatrain: C1-Q5
 
 [HIGH  ]  80q (  8.4%) | Fire / Wildfire / Urban Destruction
            Horizon: 1-15 (short) | Current: elevated
            Cycles: ['wildfire-plague-cycle']
            Top symbols: feu, mort, roi, roy, guerre, peste
            Top quatrain: C1-Q1
+
+[HIGH  ]  26q (  2.7%) | Economic / Financial Stress
+           Horizon: 15-30 (medium) | Current: moderate
+           Cycles: ['asteroid-threat-cycle', 'comet-omen-cycle', 'solar-storm-infrastructure', 'rise-fall-empire']
+           Top symbols: marche, argent, banque, mort, guerre, roi
+           Top quatrain: C1-Q52
 
 [HIGH  ]   8q (  0.8%) | Earthquake / Geophysical Event
            Horizon: 15-30 (medium) | Current: elevated
@@ -43,25 +49,19 @@ ISSUE SIGNALS (sorted by pattern strength)
 
 [HIGH  ]   8q (  0.8%) | Solar Storm / Space Weather Alert
            Horizon: 1-15 (short) | Current: moderate
-           Cycles: ['solar-storm-infrastructure', 'asteroid-threat-cycle']
+           Cycles: ['asteroid-threat-cycle', 'solar-storm-infrastructure']
            Top symbols: feu, feu du ciel, coron, terre trembler, roi, pierre ciel
            Top quatrain: C1-Q45
 
-[HIGH  ] 320q ( 33.6%) | Dynastic / Succession Crisis
-           Horizon: 15-30 (medium) | Current: high
-           Cycles: ['political-assassination']
-           Top symbols: roy, roi, regne, mort, empire, feu
-           Top quatrain: C1-Q1
+[HIGH  ]   8q (  0.8%) | Famine / Drought / Food Stress
+           Horizon: 1-15 (short) | Current: moderate
+           Cycles: ['plague-famine-war', 'disaster-famine-unrest', 'wildfire-plague-cycle']
+           Top symbols: famine, peste, militaire, mort, siege, feu
+           Top quatrain: C1-Q15
 
-[HIGH  ]  26q (  2.7%) | Economic / Financial Stress
-           Horizon: 15-30 (medium) | Current: moderate
-           Cycles: ['comet-omen-cycle', 'solar-storm-infrastructure', 'asteroid-threat-cycle', 'rise-fall-empire']
-           Top symbols: marche, argent, banque, mort, guerre, roi
-           Top quatrain: C1-Q52
-
-[MEDIUM]   4q (  0.4%) | Civil Unrest / Rebellion
+[HIGH  ]   4q (  0.4%) | Civil Unrest / Rebellion
            Horizon: 1-15 (short) | Current: high
-           Cycles: ['religious-conflict-cycle', 'disaster-famine-unrest', 'political-assassination', 'rise-fall-empire', 'asteroid-threat-cycle']
+           Cycles: ['disaster-famine-unrest', 'asteroid-threat-cycle', 'political-assassination', 'rise-fall-empire', 'religious-conflict-cycle']
            Top symbols: sedition, roy, combat, siege, feu
            Top quatrain: C1-Q12
 
@@ -126,13 +126,13 @@ SAMPLE QUATRAINS PER ISSUE (top 3 by century diversity)
 ======================================================================
 
 
---- War / Interstate Conflict (124 quatrains) ---
-  [C1-Q5] Chassez seront pour faire long combat, Par les pays seront plus fort g...
-           issues: ['war_conflict'] | symbols: ['combat']
-  [C1-Q15] Faux  l'estang ioinct vers le Sagittaire, En son haut AVGE de l'exalta...
-           issues: ['war_conflict', 'plague_epidemic', 'famine_food_stress'] | symbols: ['militaire', 'peste', 'mort', 'famine']
-  [C1-Q30] Tant d'ans en Gaule les guerres dureront, Outre la course du Castulon ...
-           issues: ['war_conflict', 'succession_dynastic'] | symbols: ['guerre', 'couronne', 'roi']
+--- Dynastic / Succession Crisis (320 quatrains) ---
+  [C1-Q1] ESTANT assis de nuict secret estude, Seul repos sur la selle d'aerain:...
+           issues: ['fire_destruction', 'succession_dynastic'] | symbols: ['flambe', 'roi']
+  [C1-Q9] Serpens transmis en la cage de fer, Ou les enfans septains du Roy sont...
+           issues: ['plague_epidemic', 'succession_dynastic'] | symbols: ['mort', 'roy']
+  [C1-Q12] Les exilez par ire, haine intestine, Feront au Roy grand coniuration: ...
+           issues: ['civil_unrest', 'succession_dynastic'] | symbols: ['sedition', 'roy']
 
 --- Plague / Epidemic / Health Shock (166 quatrains) ---
   [C1-Q9] Serpens transmis en la cage de fer, Ou les enfans septains du Roy sont...
@@ -142,13 +142,13 @@ SAMPLE QUATRAINS PER ISSUE (top 3 by century diversity)
   [C1-Q15] Faux  l'estang ioinct vers le Sagittaire, En son haut AVGE de l'exalta...
            issues: ['war_conflict', 'plague_epidemic', 'famine_food_stress'] | symbols: ['militaire', 'peste', 'mort', 'famine']
 
---- Famine / Drought / Food Stress (8 quatrains) ---
+--- War / Interstate Conflict (124 quatrains) ---
+  [C1-Q5] Chassez seront pour faire long combat, Par les pays seront plus fort g...
+           issues: ['war_conflict'] | symbols: ['combat']
   [C1-Q15] Faux  l'estang ioinct vers le Sagittaire, En son haut AVGE de l'exalta...
            issues: ['war_conflict', 'plague_epidemic', 'famine_food_stress'] | symbols: ['militaire', 'peste', 'mort', 'famine']
-  [C1-Q66] La grand famine que ie sens approcher, Souuent tourner, puis estre vni...
-           issues: ['famine_food_stress'] | symbols: ['famine']
-  [C2-Q37] De ce grand nombre que l'on enuoyera, Pour secourir dans le fort assie...
-           issues: ['war_conflict', 'plague_epidemic', 'famine_food_stress'] | symbols: ['siege', 'peste', 'famine']
+  [C1-Q30] Tant d'ans en Gaule les guerres dureront, Outre la course du Castulon ...
+           issues: ['war_conflict', 'succession_dynastic'] | symbols: ['guerre', 'couronne', 'roi']
 
 --- Fire / Wildfire / Urban Destruction (80 quatrains) ---
   [C1-Q1] ESTANT assis de nuict secret estude, Seul repos sur la selle d'aerain:...
@@ -157,6 +157,14 @@ SAMPLE QUATRAINS PER ISSUE (top 3 by century diversity)
            issues: ['plague_epidemic', 'fire_destruction'] | symbols: ['mort', 'feu']
   [C1-Q41] Le dix Calendes d'Auril de faict Gotique, Resuscit encor par gens mali...
            issues: ['fire_destruction'] | symbols: ['feu']
+
+--- Economic / Financial Stress (26 quatrains) ---
+  [C1-Q52] Las! qu'on verra grand peuple tourment, Et la loy saincte en totale ru...
+           issues: ['economic_stress'] | symbols: ['argent']
+  [C1-Q62] Les fleurs passees diminue le monde, Long temps la paix terres inhabit...
+           issues: ['war_conflict', 'economic_stress'] | symbols: ['guerre', 'marche']
+  [C2-Q27] Le diuin verbe sera du ciel frapp, Qui ne pourra proceder plus auant: ...
+           issues: ['economic_stress'] | symbols: ['marche']
 
 --- Earthquake / Geophysical Event (8 quatrains) ---
   [C1-Q19] Tours, Oriens, Blois, Angers, Reims & Nantes, Cits vexees par subit ch...
@@ -174,21 +182,13 @@ SAMPLE QUATRAINS PER ISSUE (top 3 by century diversity)
   [C2-Q81] Par feu du ciel la cit presque aduste, L'vne menace encor Deucalion, V...
            issues: ['fire_destruction', 'solar_space_alert'] | symbols: ['feu', 'feu du ciel']
 
---- Dynastic / Succession Crisis (320 quatrains) ---
-  [C1-Q1] ESTANT assis de nuict secret estude, Seul repos sur la selle d'aerain:...
-           issues: ['fire_destruction', 'succession_dynastic'] | symbols: ['flambe', 'roi']
-  [C1-Q9] Serpens transmis en la cage de fer, Ou les enfans septains du Roy sont...
-           issues: ['plague_epidemic', 'succession_dynastic'] | symbols: ['mort', 'roy']
-  [C1-Q12] Les exilez par ire, haine intestine, Feront au Roy grand coniuration: ...
-           issues: ['civil_unrest', 'succession_dynastic'] | symbols: ['sedition', 'roy']
-
---- Economic / Financial Stress (26 quatrains) ---
-  [C1-Q52] Las! qu'on verra grand peuple tourment, Et la loy saincte en totale ru...
-           issues: ['economic_stress'] | symbols: ['argent']
-  [C1-Q62] Les fleurs passees diminue le monde, Long temps la paix terres inhabit...
-           issues: ['war_conflict', 'economic_stress'] | symbols: ['guerre', 'marche']
-  [C2-Q27] Le diuin verbe sera du ciel frapp, Qui ne pourra proceder plus auant: ...
-           issues: ['economic_stress'] | symbols: ['marche']
+--- Famine / Drought / Food Stress (8 quatrains) ---
+  [C1-Q15] Faux  l'estang ioinct vers le Sagittaire, En son haut AVGE de l'exalta...
+           issues: ['war_conflict', 'plague_epidemic', 'famine_food_stress'] | symbols: ['militaire', 'peste', 'mort', 'famine']
+  [C1-Q66] La grand famine que ie sens approcher, Souuent tourner, puis estre vni...
+           issues: ['famine_food_stress'] | symbols: ['famine']
+  [C2-Q37] De ce grand nombre que l'on enuoyera, Pour secourir dans le fort assie...
+           issues: ['war_conflict', 'plague_epidemic', 'famine_food_stress'] | symbols: ['siege', 'peste', 'famine']
 
 ======================================================================
 NOTE: These are ISSUE CANDIDATES, not predictions.

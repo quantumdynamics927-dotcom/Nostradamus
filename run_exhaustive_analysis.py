@@ -15,10 +15,17 @@ from pathlib import Path
 from collections import Counter
 import html
 
-sys.path.insert(0, str(Path(__file__).parent / "analysis"))
+sys.path.insert(0, str(Path(__file__).parent))
 
 from nostradamus.analysis.issue_radar import IssueRadar, ISSUE_CATEGORIES
 from nostradamus.analysis.tkg_forecaster import load_and_build_kg
+
+# Load almanac corpus (if available)
+try:
+    from nostradamus.data.almanac_corpus import ALL_ALMANACS
+    ALMANACS = ALL_ALMANACS
+except Exception:
+    ALMANACS = None
 
 
 def main():
@@ -85,7 +92,7 @@ def main():
     # ============================================================
     print("\n[2/3] Building issue signals...")
 
-    signals = radar.scan_quatrains(quatrains, min_quatrain_count=1)
+    signals = radar.scan_quatrains(quatrains, almanacs=ALMANACS, min_quatrain_count=1)
     signals = radar.add_forecasts(signals, quatrains)
     signals.sort(key=lambda s: -s.pattern_strength)
 

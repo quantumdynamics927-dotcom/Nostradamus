@@ -148,8 +148,12 @@ class IssueSignal:
     almanac_count: int = 0
     source_quatrain_ids: List[str] = field(default_factory=list)
 
-    # Pattern strength
-    pattern_strength: float = 0.0     # 0-1, derived from source count + keyword density
+    # Pattern strength (quatrain-only base, 0-1)
+    pattern_strength: float = 0.0     # derived from quatrain count + keyword density
+    # Almanac boost (separate dimension, 0-0.3 max)
+    almanac_boost: float = 0.0
+    # Composite strength (combined ranking score)
+    composite_strength: float = 0.0
     consensus_score: float = 0.0       # how concentrated vs spread across quatrains
 
     # Cycle support
@@ -185,6 +189,8 @@ class IssueSignal:
             "almanac_count": self.almanac_count,
             "source_quatrain_ids": self.source_quatrain_ids,
             "pattern_strength": round(self.pattern_strength, 3),
+            "almanac_boost": round(self.almanac_boost, 3),
+            "composite_strength": round(self.composite_strength, 3),
             "consensus_score": round(self.consensus_score, 3),
             "cycle_matches": self.cycle_matches,
             "horizon_band": self.horizon_band,
@@ -276,9 +282,11 @@ class IssueRadar:
             symbols = [s for s, _ in cluster["symbols"].most_common(15)]
             keywords = cluster["keywords_matched"]
 
-            # Pattern strength: base on quatrain count + keyword density
-            base_strength = min(1.0, len(qids) * 0.12)
-            keyword_boost = min(0.3, len(keywords) * 0.03)
+            # Pattern strength: use log scale so large quatrain counts don't saturate
+            # strength = 1 - exp(-count * factor), with keyword bonus on top
+            q_factor = 0.12
+            base_strength = 1.0 - (1.0 / (1.0 + len(qids) * q_factor))
+            keyword_boost = min(0.25, len(keywords) * 0.025)
             pattern_strength = min(1.0, base_strength + keyword_boost)
 
             # Consensus: how many unique symbols appear
@@ -311,9 +319,14 @@ class IssueRadar:
                 horizon_years=horizon_years,
                 confidence_band=confidence,
                 current_signal_strength="low",  # updated by scan_current_relevance
+                composite_strength=0.0,  # set after almanac integration
                 status="issue_candidate",
             )
             issue_signals.append(signal)
+
+        # Step 3b: Integrate almanac entries if provided
+        if almanacs:
+            issue_signals = self._scan_almanacs(issue_signals, almanacs)
 
         # Step 4: Ground in TKG (find cycle support and historical analogs)
         issue_signals = self._ground_in_tkg(issue_signals)
@@ -321,8 +334,13 @@ class IssueRadar:
         # Step 5: Score current relevance
         issue_signals = self._score_current_relevance(issue_signals)
 
-        # Sort by pattern_strength descending
-        issue_signals.sort(key=lambda s: -s.pattern_strength)
+        # Sort by composite_strength if almanac integration ran, else pattern_strength
+        issue_signals.sort(
+            key=lambda s: (
+                -s.composite_strength if s.almanac_count > 0
+                else -s.pattern_strength
+            )
+        )
 
         return issue_signals
 
@@ -429,6 +447,80 @@ class IssueRadar:
 
         return grounded
 
+    def _scan_almanacs(
+        self,
+        signals: List[IssueSignal],
+        almanacs: List[Dict]
+    ) -> List[IssueSignal]:
+        """
+        Integrate pre-tagged almanac entries into existing IssueSignals.
+
+        Almanac entries carry pre-assigned issue_categories, motifs, and
+        astrological_markers. We boost the matching signals accordingly.
+        """
+        # Build lookup of existing signals by issue_type
+        signal_by_issue = {s.issue_type: s for s in signals}
+
+        # Aggregate almanac stats per issue
+        almanac_issue_counts: Dict[str, List[Dict]] = {issue: [] for issue in ISSUE_CATEGORIES}
+        for entry in almanacs:
+            for issue in entry.get("issue_categories", []):
+                if issue in almanac_issue_counts:
+                    almanac_issue_counts[issue].append(entry)
+
+        for issue_type, entries in almanac_issue_counts.items():
+            if not entries:
+                continue
+            if issue_type not in signal_by_issue:
+                continue
+            signal = signal_by_issue[issue_type]
+
+            # Update almanac count
+            signal.almanac_count = len(entries)
+
+            # Aggregate celestial markers from almanacs
+            for entry in entries:
+                signal.celestial_markers.extend(entry.get("astrological_markers", []))
+            signal.celestial_markers = list(set(signal.celestial_markers))[:10]
+
+            # Almanac boost: separate dimension from quatrain pattern strength
+            # Log scale: diminishing returns but meaningful lift for low-quatrain issues
+            signal.almanac_boost = 1.0 - (1.0 / (1.0 + len(entries) * 0.25))
+            # Composite strength: exponential decay over total evidence (quatrain + almanac)
+            # This produces a smooth 0-1 scale without arbitrary denominators
+            # A factor of 400 gives ~0.95 for 1000 sources, ~0.39 for 500, ~0.08 for 40
+            total_evidence = signal.quatrain_count + signal.almanac_count * 1.5
+            signal.composite_strength = 1.0 - (1.0 / (1.0 + total_evidence / 400.0))
+
+            # Upgrade confidence if almanac entries provide near-term support
+            if len(entries) >= 3 and signal.confidence_band == "medium":
+                signal.confidence_band = "high"
+            elif len(entries) >= 5 and signal.confidence_band == "low":
+                signal.confidence_band = "medium"
+
+            # Add almanac entry IDs to source tracking
+            for entry in entries:
+                aid = entry.get("entry_id", "unknown")
+                signal.source_quatrain_ids.append(f"ALM:{aid}")
+
+            # Horizon note: almanac entries are annual, so they support short-horizon signals
+            # If this issue already has a "long" or "very_long" horizon, almanac presence
+            # suggests the issue may also manifest near-term — add a note but don't override
+            if signal.horizon_band in ("long", "very_long") and entries:
+                signal.contemporary_notes.append(
+                    f"Near-term almanac support ({len(entries)} entries) suggests "
+                    "possible early manifestation within annual horizon."
+                )
+
+        # Compute composite_strength for signals that received no almanac entries
+        # (they fall through with almanac_count still 0)
+        for signal in signals:
+            if signal.almanac_count == 0:
+                total_evidence = signal.quatrain_count  # no almanac contribution
+                signal.composite_strength = 1.0 - (1.0 / (1.0 + total_evidence / 400.0))
+
+        return signals
+
     def _horizon_for_band(self, band: str) -> str:
         """Map horizon band to year range string."""
         mapping = {
@@ -499,7 +591,9 @@ class IssueRadar:
 
         for signal in signals:
             hypotheses = []
-            for qid in signal.source_quatrain_ids[:5]:  # top 5 quatrains per issue
+            # Only generate forecasts from quatrain sources (skip ALM: entries)
+            quatrain_ids = [qid for qid in signal.source_quatrain_ids if not qid.startswith("ALM:")]
+            for qid in quatrain_ids[:5]:  # top 5 quatrains per issue
                 q = quatrain_map.get(qid)
                 if not q:
                     continue
@@ -538,7 +632,9 @@ class IssueRadar:
             lines.append(f"ISSUE #{i}: {sig.issue_label} ({sig.issue_type})")
             lines.append(f"  Status: {sig.status}")
             lines.append(f"  Quatrain sources: {sig.quatrain_count} | Almanac sources: {sig.almanac_count}")
-            lines.append(f"  Pattern strength: {sig.pattern_strength:.3f} | Consensus: {sig.consensus_score:.3f}")
+            lines.append(f"  Composite strength: {sig.composite_strength:.3f} "
+                         f"(base={sig.pattern_strength:.3f}, almanac_boost={sig.almanac_boost:.3f})")
+            lines.append(f"  Consensus: {sig.consensus_score:.3f}")
             lines.append(f"  Confidence band: {sig.confidence_band}")
             lines.append(f"  Horizon: {sig.horizon_years} ({sig.horizon_band})")
             lines.append(f"  Cycle matches: {sig.cycle_matches or 'none'}")
