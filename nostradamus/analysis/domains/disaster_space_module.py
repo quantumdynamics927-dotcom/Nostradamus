@@ -345,32 +345,98 @@ def _extract_temporal_markers(text_lower: str) -> List[str]:
 
 def get_catalog_stats() -> Dict:
     """
-    Return summary statistics from the disasters_space_kb.
+    Return summary statistics from the disasters_space_kb and solar_cycle_kb.
     Used to compute pattern significance against real event frequencies.
     """
+    stats = {}
+
+    # Disaster / space KB stats
     try:
         from nostradamus.data.disasters_space_kb import DISASTERS_KB, SPACE_EVENTS_KB
-
         disaster_types = {}
         for e in DISASTERS_KB:
             t = e.get("event_type", "unknown")
             disaster_types[t] = disaster_types.get(t, 0) + 1
-
         space_types = {}
         for e in SPACE_EVENTS_KB:
             t = e.get("event_type", "unknown")
             space_types[t] = space_types.get(t, 0) + 1
-
-        return {
-            "total_disaster_events": len(DISASTERS_KB),
-            "total_space_events": len(SPACE_EVENTS_KB),
-            "disaster_types": disaster_types,
-            "space_types": space_types,
-            "disaster_frequency_per_year": round(len(DISASTERS_KB) / 500, 1),  # ~500 years of data
-            "space_frequency_per_year": round(len(SPACE_EVENTS_KB) / 500, 1),
+        stats["disasters"] = {
+            "total": len(DISASTERS_KB),
+            "by_type": disaster_types,
+            "frequency_per_year": round(len(DISASTERS_KB) / 500, 1),
+        }
+        stats["space_events"] = {
+            "total": len(SPACE_EVENTS_KB),
+            "by_type": space_types,
+            "frequency_per_year": round(len(SPACE_EVENTS_KB) / 500, 1),
         }
     except ImportError:
-        return {"error": "disasters_space_kb not available"}
+        pass
+
+    # Solar cycle stats
+    try:
+        from nostradamus.data.solar_cycle_kb import (
+            get_current_solar_phase, get_solar_storm_stats,
+            MAJOR_SOLAR_STORMS
+        )
+        stats["solar"] = {
+            "current_phase": get_current_solar_phase()["phase"],
+            "storm_stats": get_solar_storm_stats(),
+            "major_storms_count": len(MAJOR_SOLAR_STORMS),
+        }
+    except ImportError:
+        pass
+
+    return stats
+
+
+def get_solar_storm_risk(year: int) -> Dict:
+    """
+    Return solar storm risk for a given year.
+
+    Integrates SOLAR_CYCLE_KB to condition solar storm probability
+    on the solar cycle phase for that year.
+    """
+    try:
+        from nostradamus.data.solar_cycle_kb import get_storm_risk_for_year
+        return get_storm_risk_for_year(year)
+    except ImportError:
+        return {"risk": "unknown", "reason": "solar_cycle_kb not available"}
+
+
+def get_forecast_solar_conditioning(horizon_years: List[int]) -> Dict:
+    """
+    For a list of horizon years (e.g. [2026, 2027, 2028]),
+    return solar cycle conditioning info for each year.
+
+    Used to weight solar-storm hypotheses based on where we are
+    in the solar cycle (maxima = higher storm probability).
+    """
+    try:
+        from nostradamus.data.solar_cycle_kb import get_storm_risk_for_year
+    except ImportError:
+        return {}
+
+    results = {}
+    for year in horizon_years:
+        results[str(year)] = get_storm_risk_for_year(year)
+
+    # Summarize: are we approaching or leaving solar maximum?
+    phases = [r.get("phase") for r in results.values()]
+    phase_counts = {}
+    for p in phases:
+        phase_counts[p] = phase_counts.get(p, 0) + 1
+
+    dominant = max(phase_counts, key=phase_counts.get) if phase_counts else "unknown"
+
+    return {
+        "horizons": results,
+        "dominant_phase": dominant,
+        "near_maximum": dominant == "maximum",
+        "near_minimum": dominant in ("minimum",),
+        "weighted_risk": "high" if dominant == "maximum" else "moderate" if dominant in ("ascending", "declining") else "low",
+    }
 
 
 # === MONTE CARLO VALIDATION HELPERS ===

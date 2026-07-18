@@ -15,7 +15,7 @@ from .crypto_module import CryptoModule, SymbolicEncoder
 from .disaster_space_module import (
     DisasterProfile, SpaceProfile,
     analyze_disaster_space, analyze_disaster, analyze_space,
-    get_catalog_stats
+    get_catalog_stats, get_solar_storm_risk, get_forecast_solar_conditioning
 )
 
 __all__ = [
